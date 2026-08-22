@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package user.v1;
+
+// 用户对象
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  int64 created_at = 4;
+}
+
+// 创建用户
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+}
+
+message CreateUserReply {
+  User user = 1;
+}
+
+// 查询单个用户
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserReply {
+  User user = 1;
+}
+
+// 分页列出用户
+message ListUsersRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message ListUsersReply {
+  repeated User users = 1;
+  int64 total = 2;
+}
+
+// 统计信息（演示 Redis 原子计数 INCR）
+message GetStatsRequest {}
+
+message GetStatsReply {
+  int64 total_users = 1;     // Redis SCARD users:ids
+  int64 request_count = 2;   // Redis GET stats:request_count
+}
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserReply);
+  rpc GetUser(GetUserRequest) returns (GetUserReply);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersReply);
+  rpc GetStats(GetStatsRequest) returns (GetStatsReply);
+}

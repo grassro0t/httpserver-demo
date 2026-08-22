@@ -1,0 +1,12 @@
+# 构建产物
+build/
+
+# nginx 本地运行日志
+deploy/nginx/logs/
+
+# Redis 持久化文件（本地启动 redis-server 时可能生成）
+dump.rdb
+
+# 编辑器/系统
+.DS_Store
+*.swp
