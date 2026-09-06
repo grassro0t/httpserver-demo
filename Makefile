@@ -23,9 +23,12 @@ build: proto
 	cmake -S . -B $(BUILD_DIR)
 	cmake --build $(BUILD_DIR) -j$$(sysctl -n hw.ncpu 2>/dev/null || echo 4)
 
-# 3) 启动业务服务（gRPC :9090，需先启动 redis）
+# 3) 启动业务服务（gRPC :9090，需先启动 mysql + redis；可带 mysql 参数覆盖默认 root@127.0.0.1 空密码）
 run-grpc:
-	./$(BUILD_DIR)/grpc_server --port=9090 --redis-host=127.0.0.1 --redis-port=6379
+	./$(BUILD_DIR)/grpc_server --port=9090 \
+		--mysql-host=127.0.0.1 --mysql-port=3306 \
+		--mysql-user=root --mysql-password= --mysql-pool-size=8 \
+		--redis-host=127.0.0.1 --redis-port=6379
 
 # 4) 启动两个 HTTP 网关实例（负载均衡后端）
 run-gateway-1:
@@ -42,17 +45,17 @@ run-nginx:
 stop-nginx:
 	-nginx -c $(abspath deploy/nginx/nginx.conf) -p $(abspath deploy/nginx) -s stop 2>/dev/null
 
-# 6) 端到端自测（依赖 redis + grpc_server + gateway 已启动）
+# 6) 端到端自测（依赖 mysql + redis + grpc_server + gateway + nginx 已启动）
 test:
 	@echo "== 创建用户 =="
 	@curl -s -X POST http://127.0.0.1:8080/api/v1/users -H 'Content-Type: application/json' -d '{"name":"tom","email":"tom@example.com"}'; echo
-	@echo "== 查询用户 =="
-	@curl -s http://127.0.0.1:8080/api/v1/users/u1; echo
+	@echo "== 再建一个并回查（动态取自增 ID）=="
+	@ID=$$(curl -s -X POST http://127.0.0.1:8080/api/v1/users -H 'Content-Type: application/json' -d '{"name":"jerry","email":"jerry@example.com"}' | sed -n 's/.*"id":"\([^"]*\)".*/\1/p'); echo "jerry id=$$ID"; curl -s http://127.0.0.1:8080/api/v1/users/$$ID; echo
 	@echo "== 用户列表 =="
 	@curl -s 'http://127.0.0.1:8080/api/v1/users?limit=10&offset=0'; echo
 	@echo "== 统计 =="
 	@curl -s http://127.0.0.1:8080/api/v1/stats; echo
-	@echo "== 健康检查（观察 X-Gateway-Instance 头的变化即可看到负载均衡轮询）=="
+	@echo "== 健康检查（观察 X-Gateway-Instance 头变化看负载均衡轮询）=="
 	@for i in 1 2 3 4; do curl -s -i http://127.0.0.1:8080/healthz 2>/dev/null | grep -i 'x-gateway-instance'; done
 
 clean:

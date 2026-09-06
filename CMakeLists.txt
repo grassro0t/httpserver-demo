@@ -19,6 +19,9 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GRPC REQUIRED IMPORTED_TARGET grpc++)
 pkg_check_modules(PROTOBUF REQUIRED IMPORTED_TARGET protobuf)
 pkg_check_modules(HIREDIS REQUIRED IMPORTED_TARGET hiredis)
+# MySQL 客户端（libmysqlclient）
+find_path(MYSQL_INCLUDE_DIR mysql/mysql.h REQUIRED)
+find_library(MYSQL_CLIENT_LIB mysqlclient REQUIRED)
 # protoc 的 gRPC C++ 代码生成插件
 find_program(GRPC_CPP_PLUGIN grpc_cpp_plugin REQUIRED)
 
@@ -49,16 +52,20 @@ add_custom_command(
 add_executable(grpc_server
   src/grpc_server/main.cpp
   src/grpc_server/user_service.cpp
+  src/store/mysql_pool.cpp
   src/store/redis_client.cpp
+  src/store/user_repository.cpp
   src/common/config.cpp
   ${GEN_SRCS})
 target_link_libraries(grpc_server PRIVATE
   PkgConfig::GRPC
   PkgConfig::PROTOBUF
   PkgConfig::HIREDIS
+  ${MYSQL_CLIENT_LIB}
   nlohmann_json::nlohmann_json)
 target_include_directories(grpc_server PRIVATE
   ${GEN_DIR}
+  ${MYSQL_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/src)
 
 # ===================== gateway（HTTP 网关） =====================

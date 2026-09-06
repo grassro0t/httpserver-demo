@@ -4,15 +4,15 @@
 
 #include <grpcpp/grpcpp.h>
 
-#include "store/redis_client.h"
+#include "store/user_repository.h"
 #include "user/v1/user.grpc.pb.h"
 
 namespace http_server_demo {
 
-// UserService 的 gRPC 实现：业务逻辑 + Redis 读写
+// UserService 的 gRPC 实现：业务逻辑通过 UserRepository 访问 MySQL(持久化)+Redis(缓存)
 class UserServiceImpl final : public user::v1::UserService::Service {
  public:
-  explicit UserServiceImpl(std::shared_ptr<RedisClient> redis);
+  explicit UserServiceImpl(std::shared_ptr<UserRepository> repo);
 
   grpc::Status CreateUser(grpc::ServerContext* context,
                           const user::v1::CreateUserRequest* request,
@@ -31,11 +31,7 @@ class UserServiceImpl final : public user::v1::UserService::Service {
                         user::v1::GetStatsReply* reply) override;
 
  private:
-  bool SaveUser(const user::v1::User& user);
-  bool LoadUser(const std::string& id, user::v1::User* user);
-  void CountRequest();
-
-  std::shared_ptr<RedisClient> redis_;
+  std::shared_ptr<UserRepository> repo_;
 };
 
 }  // namespace http_server_demo
