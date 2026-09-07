@@ -10,3 +10,6 @@ dump.rdb
 # 编辑器/系统
 .DS_Store
 *.swp
+
+# 本地学习笔记
+NOTES.md
