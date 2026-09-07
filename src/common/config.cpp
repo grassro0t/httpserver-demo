@@ -21,8 +21,8 @@ std::map<std::string, std::string> ParseArgs(int argc, char** argv) {
   return args;
 }
 
-std::string GetArg(const std::map<std::string, std::string>& args,
-                   const std::string& key, const std::string& def) {
+std::string GetArg(const std::map<std::string, std::string>& args, const std::string& key,
+                   const std::string& def) {
   auto it = args.find(key);
   if (it != args.end()) {
     return it->second;

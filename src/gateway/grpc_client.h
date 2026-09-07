@@ -1,10 +1,10 @@
 #pragma once
 
+#include <grpcpp/grpcpp.h>
+
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <grpcpp/grpcpp.h>
 
 #include "user/v1/user.grpc.pb.h"
 
@@ -24,11 +24,9 @@ class GrpcClient {
 
   bool connect(const std::string& server_addr);
 
-  RpcStatus CreateUser(const std::string& name, const std::string& email,
-                       user::v1::User* out);
+  RpcStatus CreateUser(const std::string& name, const std::string& email, user::v1::User* out);
   RpcStatus GetUser(const std::string& id, user::v1::User* out);
-  RpcStatus ListUsers(int limit, int offset, std::vector<user::v1::User>* out,
-                      int64_t* total);
+  RpcStatus ListUsers(int limit, int offset, std::vector<user::v1::User>* out, int64_t* total);
   RpcStatus GetStats(int64_t* total_users, int64_t* request_count);
 
   const std::string& lastError() const { return err_; }

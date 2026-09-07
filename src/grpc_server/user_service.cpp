@@ -5,8 +5,7 @@
 
 namespace http_server_demo {
 
-UserServiceImpl::UserServiceImpl(std::shared_ptr<UserRepository> repo)
-    : repo_(std::move(repo)) {}
+UserServiceImpl::UserServiceImpl(std::shared_ptr<UserRepository> repo) : repo_(std::move(repo)) {}
 
 grpc::Status UserServiceImpl::CreateUser(grpc::ServerContext* context,
                                          const user::v1::CreateUserRequest* request,

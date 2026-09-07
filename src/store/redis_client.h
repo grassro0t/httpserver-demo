@@ -1,11 +1,11 @@
 #pragma once
 
+#include <hiredis/hiredis.h>
+
 #include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
-
-#include <hiredis/hiredis.h>
 
 namespace http_server_demo {
 

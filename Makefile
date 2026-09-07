@@ -1,11 +1,12 @@
 # http_server_demo 常用命令封装
-# 用法：make <proto|build|run-grpc|run-gateway-1|run-gateway-2|run-nginx|stop-nginx|test|clean>
+# 用法：make <proto|build|run-grpc|run-gateway-1|run-gateway-2|run-nginx|stop-nginx|test|lint|format|clean>
 
 BUILD_DIR := build
 GEN_DIR   := generated
+SRC_FILES := $(shell find src -name '*.cpp' -o -name '*.h' | sort)
 
 .PHONY: all proto build clean \
-        run-grpc run-gateway-1 run-gateway-2 run-nginx stop-nginx test
+        run-grpc run-gateway-1 run-gateway-2 run-nginx stop-nginx test lint format
 
 all: build
 
@@ -57,6 +58,16 @@ test:
 	@curl -s http://127.0.0.1:8080/api/v1/stats; echo
 	@echo "== 健康检查（观察 X-Gateway-Instance 头变化看负载均衡轮询）=="
 	@for i in 1 2 3 4; do curl -s -i http://127.0.0.1:8080/healthz 2>/dev/null | grep -i 'x-gateway-instance'; done
+
+# 7) clang-format 代码风格检查（Google 风格，列宽 100，符合则退出码 0）
+lint:
+	@for f in $(SRC_FILES); do \
+		clang-format --dry-run --Werror $$f >/dev/null 2>&1 || { echo "✗ 需格式化: $$f"; exit 1; }; \
+	done; echo "✓ 全部源码符合 .clang-format (Google)";
+
+# 一键将源码格式化为 Google 风格
+format:
+	clang-format -i $(SRC_FILES)
 
 clean:
 	rm -rf $(BUILD_DIR)

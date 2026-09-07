@@ -1,12 +1,12 @@
 #pragma once
 
+#include <mysql/mysql.h>
+
 #include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
-
-#include <mysql/mysql.h>
 
 namespace http_server_demo {
 

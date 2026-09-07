@@ -2,9 +2,8 @@
 
 #include <chrono>
 #include <cstdlib>
-#include <utility>
-
 #include <nlohmann/json.hpp>
+#include <utility>
 
 #include "common/json_utils.h"
 
@@ -12,9 +11,9 @@ namespace http_server_demo {
 
 namespace {
 
-constexpr int kUserCacheTtl = 60;    // 单用户缓存 60s
-constexpr int kListCacheTtl = 10;    // 列表缓存 10s
-constexpr int kStatsCacheTtl = 30;   // 统计缓存 30s
+constexpr int kUserCacheTtl = 60;                            // 单用户缓存 60s
+constexpr int kListCacheTtl = 10;                            // 列表缓存 10s
+constexpr int kStatsCacheTtl = 30;                           // 统计缓存 30s
 constexpr const char* kListCacheIndex = "cache:users:list";  // 列表缓存 key 索引
 
 int64_t NowUnixSeconds() {
@@ -29,8 +28,7 @@ std::string ListCacheKey(int limit, int offset) {
 
 }  // namespace
 
-UserRepository::UserRepository(std::shared_ptr<MysqlPool> pool,
-                               std::shared_ptr<RedisClient> redis)
+UserRepository::UserRepository(std::shared_ptr<MysqlPool> pool, std::shared_ptr<RedisClient> redis)
     : pool_(std::move(pool)), redis_(std::move(redis)) {}
 
 void UserRepository::CountRequest() { redis_->incr("stats:request_count"); }
@@ -53,9 +51,8 @@ bool UserRepository::CreateUser(const std::string& name, const std::string& emai
   auto guard = pool_->acquire();
   MysqlConn* conn = guard.get();
 
-  std::string sql = "INSERT INTO users(name, email, created_at) VALUES('" +
-                    conn->escape(name) + "','" + conn->escape(email) + "'," +
-                    std::to_string(now) + ")";
+  std::string sql = "INSERT INTO users(name, email, created_at) VALUES('" + conn->escape(name) +
+                    "','" + conn->escape(email) + "'," + std::to_string(now) + ")";
   if (!conn->execute(sql)) return false;
 
   user::v1::User user;
@@ -107,8 +104,8 @@ std::optional<user::v1::User> UserRepository::GetUser(const std::string& id) {
   return u;
 }
 
-bool UserRepository::ListUsers(int limit, int offset,
-                               std::vector<user::v1::User>* out, int64_t* total) {
+bool UserRepository::ListUsers(int limit, int offset, std::vector<user::v1::User>* out,
+                               int64_t* total) {
   std::string cacheKey = ListCacheKey(limit, offset);
 
   // 1. 查缓存
@@ -194,4 +191,3 @@ bool UserRepository::GetStats(int64_t* total_users, int64_t* request_count) {
 }
 
 }  // namespace http_server_demo
-

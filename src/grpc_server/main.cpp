@@ -1,9 +1,9 @@
 // grpc-server 入口：启动 gRPC 业务服务
 //   存储架构：MySQL(持久化,连接池) + Redis(缓存)
+#include <grpcpp/grpcpp.h>
+
 #include <iostream>
 #include <memory>
-
-#include <grpcpp/grpcpp.h>
 
 #include "common/config.h"
 #include "grpc_server/user_service.h"
@@ -35,23 +35,20 @@ int main(int argc, char** argv) {
   // 1. 初始化 MySQL 连接池（自动建库建表）
   auto pool = std::make_shared<MysqlPool>();
   if (!pool->init(mysql_cfg)) {
-    std::cerr << "[grpc-server] MySQL 连接池初始化失败: " << pool->lastError()
-              << std::endl;
+    std::cerr << "[grpc-server] MySQL 连接池初始化失败: " << pool->lastError() << std::endl;
     return 1;
   }
-  std::cout << "[grpc-server] MySQL 连接池就绪 " << mysql_cfg.host << ":"
-            << mysql_cfg.port << " db=" << mysql_cfg.database
-            << " 池大小=" << mysql_cfg.pool_size << std::endl;
+  std::cout << "[grpc-server] MySQL 连接池就绪 " << mysql_cfg.host << ":" << mysql_cfg.port
+            << " db=" << mysql_cfg.database << " 池大小=" << mysql_cfg.pool_size << std::endl;
 
   // 2. 连接 Redis（缓存）
   auto redis = std::make_shared<RedisClient>();
   if (!redis->connect(redis_host, redis_port)) {
-    std::cerr << "[grpc-server] 连接 Redis 失败 " << redis_host << ":" << redis_port
-              << " - " << redis->lastError() << std::endl;
+    std::cerr << "[grpc-server] 连接 Redis 失败 " << redis_host << ":" << redis_port << " - "
+              << redis->lastError() << std::endl;
     return 1;
   }
-  std::cout << "[grpc-server] Redis 缓存已连接 " << redis_host << ":" << redis_port
-            << std::endl;
+  std::cout << "[grpc-server] Redis 缓存已连接 " << redis_host << ":" << redis_port << std::endl;
 
   // 3. 组装数据访问层与业务服务
   auto repo = std::make_shared<UserRepository>(pool, redis);
@@ -59,8 +56,7 @@ int main(int argc, char** argv) {
 
   // 4. 注册服务并启动 gRPC Server
   ServerBuilder builder;
-  builder.AddListeningPort("0.0.0.0:" + std::to_string(port),
-                           grpc::InsecureServerCredentials());
+  builder.AddListeningPort("0.0.0.0:" + std::to_string(port), grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
 
   std::unique_ptr<grpc::Server> server = builder.BuildAndStart();

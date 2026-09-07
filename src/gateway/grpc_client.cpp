@@ -51,8 +51,8 @@ RpcStatus GrpcClient::GetUser(const std::string& id, user::v1::User* out) {
   return RpcStatus::kError;
 }
 
-RpcStatus GrpcClient::ListUsers(int limit, int offset,
-                                std::vector<user::v1::User>* out, int64_t* total) {
+RpcStatus GrpcClient::ListUsers(int limit, int offset, std::vector<user::v1::User>* out,
+                                int64_t* total) {
   user::v1::ListUsersRequest request;
   user::v1::ListUsersReply reply;
   request.set_limit(limit);

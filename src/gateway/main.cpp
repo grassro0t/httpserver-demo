@@ -1,7 +1,7 @@
 // gateway 入口：启动 Drogon HTTP 服务器（负载均衡中的一个后端实例）
-#include <iostream>
-
 #include <drogon/drogon.h>
+
+#include <iostream>
 
 #include "common/config.h"
 #include "gateway/gateway_context.h"
@@ -18,14 +18,10 @@ int main(int argc, char** argv) {
 
   GatewayContext::instance().init(cfg);
 
-  std::cout << "[gateway] 实例 " << cfg.instance_id
-            << " 监听 0.0.0.0:" << cfg.port
+  std::cout << "[gateway] 实例 " << cfg.instance_id << " 监听 0.0.0.0:" << cfg.port
             << "，gRPC 后端 " << cfg.grpc_addr << std::endl;
 
-  drogon::app()
-      .addListener("0.0.0.0", cfg.port)
-      .setLogLevel(trantor::Logger::kWarn)
-      .run();
+  drogon::app().addListener("0.0.0.0", cfg.port).setLogLevel(trantor::Logger::kWarn).run();
 
   return 0;
 }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace http_server_demo {
 
@@ -9,7 +9,7 @@ namespace http_server_demo {
 std::map<std::string, std::string> ParseArgs(int argc, char** argv);
 
 // 取参数，缺失时返回默认值
-std::string GetArg(const std::map<std::string, std::string>& args,
-                   const std::string& key, const std::string& def);
+std::string GetArg(const std::map<std::string, std::string>& args, const std::string& key,
+                   const std::string& def);
 
 }  // namespace http_server_demo

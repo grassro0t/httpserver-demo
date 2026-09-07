@@ -26,8 +26,8 @@ bool MysqlConn::connect(const MysqlConfig& cfg) {
   }
 
   const char* db = cfg.database.empty() ? nullptr : cfg.database.c_str();
-  if (!mysql_real_connect(mysql_, cfg.host.c_str(), cfg.user.c_str(),
-                          cfg.password.c_str(), db, cfg.port, nullptr, 0)) {
+  if (!mysql_real_connect(mysql_, cfg.host.c_str(), cfg.user.c_str(), cfg.password.c_str(), db,
+                          cfg.port, nullptr, 0)) {
     err_ = mysql_error(mysql_);
     close();
     return false;
@@ -85,8 +85,8 @@ bool MysqlPool::init(const MysqlConfig& cfg) {
       err_ = "建库连接失败: " + tmp.lastError();
       return false;
     }
-    std::string sql = "CREATE DATABASE IF NOT EXISTS `" + cfg_.database +
-                      "` DEFAULT CHARACTER SET utf8mb4";
+    std::string sql =
+        "CREATE DATABASE IF NOT EXISTS `" + cfg_.database + "` DEFAULT CHARACTER SET utf8mb4";
     if (!tmp.execute(sql)) {
       err_ = "CREATE DATABASE 失败: " + tmp.lastError();
       return false;

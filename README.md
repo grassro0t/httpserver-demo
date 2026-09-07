@@ -45,6 +45,8 @@ macOS + Homebrew：
 brew install protobuf grpc pkg-config hiredis nlohmann-json redis nginx drogon mysql
 ```
 
+> 如需 `make lint` / `make format`（clang-format 检查与格式化），额外安装：`brew install clang-format`
+
 启动 MySQL 与 Redis：
 
 ```bash
@@ -139,6 +141,17 @@ make stop-nginx
 | 缓存 | hiredis（RAII 封装） + Redis |
 | JSON | nlohmann/json |
 | 负载均衡 | nginx |
+
+## 代码风格（clang-format）
+
+项目使用 **Google 风格**（根目录 `.clang-format`，`ColumnLimit: 100`）统一源码格式：
+
+```bash
+make format   # 一键将 src/ 下所有源码格式化为 Google 风格
+make lint     # 检查格式是否符合（不合规会列出文件并以非零退出码结束）
+```
+
+> 说明：`generated/`（protoc 生成代码）不参与格式化；`.clang-format` 可随仓库提交，供团队/IDE 统一风格。
 
 ## 常见问题
 

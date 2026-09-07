@@ -1,8 +1,7 @@
 #include "gateway/user_controller.h"
 
-#include <string>
-
 #include <nlohmann/json.hpp>
+#include <string>
 
 #include "common/json_utils.h"
 #include "gateway/gateway_context.h"
@@ -12,8 +11,7 @@ namespace http_server_demo {
 namespace {
 
 // 公共响应外壳：注入实例标识头 + 统一 JSON 返回
-drogon::HttpResponsePtr MakeJsonResponse(drogon::HttpStatusCode code,
-                                         const std::string& body) {
+drogon::HttpResponsePtr MakeJsonResponse(drogon::HttpStatusCode code, const std::string& body) {
   auto resp = drogon::HttpResponse::newHttpResponse();
   resp->setStatusCode(code);
   resp->setContentTypeCode(drogon::CT_APPLICATION_JSON);
@@ -22,8 +20,7 @@ drogon::HttpResponsePtr MakeJsonResponse(drogon::HttpStatusCode code,
   return resp;
 }
 
-drogon::HttpResponsePtr ErrorResponse(drogon::HttpStatusCode code,
-                                      const std::string& msg) {
+drogon::HttpResponsePtr ErrorResponse(drogon::HttpStatusCode code, const std::string& msg) {
   nlohmann::json j;
   j["error"] = msg;
   return MakeJsonResponse(code, j.dump());
@@ -31,9 +28,8 @@ drogon::HttpResponsePtr ErrorResponse(drogon::HttpStatusCode code,
 
 }  // namespace
 
-void UserController::createUser(
-    const drogon::HttpRequestPtr& req,
-    std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
+void UserController::createUser(const drogon::HttpRequestPtr& req,
+                                std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
   auto body = req->getJsonObject();
   if (!body || !body->isObject() || !body->isMember("name")) {
     callback(ErrorResponse(drogon::k400BadRequest, "name is required"));
@@ -41,20 +37,19 @@ void UserController::createUser(
   }
 
   user::v1::User user;
-  RpcStatus st = GatewayContext::instance().grpc().CreateUser(
-      (*body)["name"].asString(), (*body)["email"].asString(), &user);
+  RpcStatus st = GatewayContext::instance().grpc().CreateUser((*body)["name"].asString(),
+                                                              (*body)["email"].asString(), &user);
   if (st != RpcStatus::kOk) {
-    callback(ErrorResponse(drogon::k502BadGateway,
-                           "grpc CreateUser failed: " +
-                               GatewayContext::instance().grpc().lastError()));
+    callback(
+        ErrorResponse(drogon::k502BadGateway,
+                      "grpc CreateUser failed: " + GatewayContext::instance().grpc().lastError()));
     return;
   }
   callback(MakeJsonResponse(drogon::k201Created, UserToJsonString(user)));
 }
 
-void UserController::getUser(
-    const drogon::HttpRequestPtr& req,
-    std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
+void UserController::getUser(const drogon::HttpRequestPtr& req,
+                             std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
   // Drogon 1.9：路径参数通过 getRoutingParameters() 按模板位置获取
   const auto& params = req->getRoutingParameters();
   if (params.empty()) {
@@ -70,17 +65,16 @@ void UserController::getUser(
     return;
   }
   if (st != RpcStatus::kOk) {
-    callback(ErrorResponse(drogon::k502BadGateway,
-                           "grpc GetUser failed: " +
-                               GatewayContext::instance().grpc().lastError()));
+    callback(
+        ErrorResponse(drogon::k502BadGateway,
+                      "grpc GetUser failed: " + GatewayContext::instance().grpc().lastError()));
     return;
   }
   callback(MakeJsonResponse(drogon::k200OK, UserToJsonString(user)));
 }
 
-void UserController::listUsers(
-    const drogon::HttpRequestPtr& req,
-    std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
+void UserController::listUsers(const drogon::HttpRequestPtr& req,
+                               std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
   int limit = req->getOptionalParameter<int>("limit").value_or(10);
   int offset = req->getOptionalParameter<int>("offset").value_or(0);
 
@@ -88,9 +82,9 @@ void UserController::listUsers(
   int64_t total = 0;
   RpcStatus st = GatewayContext::instance().grpc().ListUsers(limit, offset, &users, &total);
   if (st != RpcStatus::kOk) {
-    callback(ErrorResponse(drogon::k502BadGateway,
-                           "grpc ListUsers failed: " +
-                               GatewayContext::instance().grpc().lastError()));
+    callback(
+        ErrorResponse(drogon::k502BadGateway,
+                      "grpc ListUsers failed: " + GatewayContext::instance().grpc().lastError()));
     return;
   }
 
@@ -103,17 +97,15 @@ void UserController::listUsers(
   callback(MakeJsonResponse(drogon::k200OK, j.dump()));
 }
 
-void UserController::getStats(
-    const drogon::HttpRequestPtr& req,
-    std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
+void UserController::getStats(const drogon::HttpRequestPtr& req,
+                              std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
   int64_t total_users = 0;
   int64_t request_count = 0;
-  RpcStatus st =
-      GatewayContext::instance().grpc().GetStats(&total_users, &request_count);
+  RpcStatus st = GatewayContext::instance().grpc().GetStats(&total_users, &request_count);
   if (st != RpcStatus::kOk) {
-    callback(ErrorResponse(drogon::k502BadGateway,
-                           "grpc GetStats failed: " +
-                               GatewayContext::instance().grpc().lastError()));
+    callback(
+        ErrorResponse(drogon::k502BadGateway,
+                      "grpc GetStats failed: " + GatewayContext::instance().grpc().lastError()));
     return;
   }
 
@@ -123,9 +115,8 @@ void UserController::getStats(
   callback(MakeJsonResponse(drogon::k200OK, j.dump()));
 }
 
-void UserController::health(
-    const drogon::HttpRequestPtr& req,
-    std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
+void UserController::health(const drogon::HttpRequestPtr& req,
+                            std::function<void(const drogon::HttpResponsePtr&)>&& callback) {
   nlohmann::json j;
   j["status"] = "ok";
   j["instance"] = GatewayContext::instance().instanceId();
