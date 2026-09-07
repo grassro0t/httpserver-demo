@@ -130,7 +130,7 @@ make stop-nginx
 
 | 层 | 选型 |
 |---|---|
-| 语言 | C++17 |
+| 语言 | C++20 |
 | 构建 | CMake |
 | HTTP 网关 | Drogon 1.9 |
 | RPC | gRPC C++（brew 安装）+ protobuf |
