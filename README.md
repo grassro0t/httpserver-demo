@@ -1,6 +1,6 @@
 # http_server_demo
 
-基于 **nginx + gRPC + MySQL + Redis** 的 C++ 分层微服务 HTTP 后端 demo。
+基于 **nginx + gRPC + MySQL + Redis** 的 C++ 分层微服务 HTTP 后端 demo，本项目存在一些并发性问题，在持续迭代中。
 
 - **nginx**：HTTP 入口，`upstream` 轮询负载均衡
 - **gateway（HTTP 网关，可多实例）**：Drogon 框架，对外暴露 REST API
